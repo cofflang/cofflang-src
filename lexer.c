@@ -103,24 +103,6 @@ Token get_next_token() {
   return token;
 }
 
-Symbol* lookup_symbol(char *name) {
-  for (int i = 0; i < num_symbols; i++) {
-    if (strcmp(symbol_table[i].name, name) == 0) {
-      return &symbol_table[i];
-    }
-  }
-  return NULL;
-}
-
-void add_symbol(char *name, int type, int value) {
-  if(!lookup_symbol(name)) {
-    symbol_table[num_symbols].name = strdup(name);
-    symbol_table[num_symbols].type = type;
-    symbol_table[num_symbols].value = value;
-    num_symbols++;
-  }
-}
-
 void add_token(int type, int value, char* str) {
   if (num_tokens == MAX_TOKENS) {
     // Error: token array is full
@@ -138,40 +120,6 @@ Token *get_token(int index) {
     return NULL;
   }
   return &tokens[index];
-}
-
-void print_symbol_table(Symbol *symbol_table, int num_symbols) {
-  printf("\n");
-  printf("=============================\n");
-  printf("Symbol Table\n");
-  printf("=============================\n");
-  printf("name        type        value\n");
-  printf("-----------------------------\n");
-
-  for (int i = 0; i < num_symbols; i++) {
-    Symbol symbol = symbol_table[i];
-    printf("%-12s%-12s%d\n", symbol.name, token_to_string(symbol.type), symbol.value);
-  }
-}
-
-void write_symbol_table(Symbol *symbol_table, int num_symbols) {
-  FILE *fp = fopen("output/lexer-symtab-out.txt", "w");
-  if (fp == NULL) {
-    perror("Error opening file");
-    return;
-  }
-
-  fprintf(fp, "=============================\n");
-  fprintf(fp, "Symbol Table\n");
-  fprintf(fp, "=============================\n");
-  fprintf(fp, "name        type        value\n");
-  fprintf(fp, "-----------------------------\n");
-  for (int i = 0; i < num_symbols; i++) {
-    Symbol symbol = symbol_table[i];
-    fprintf(fp, "%-12s%-12s%d\n", symbol.name, token_to_string(symbol.type), symbol.value);
-  }
-
-  fclose(fp);
 }
 
 int main(int argc, char **argv) {
@@ -204,14 +152,14 @@ int main(int argc, char **argv) {
   Token token = get_next_token();
   while (token.type != T_EOF) {
     printf("Token(%-2d, %-2d): type=%-3d(%-12s) ival=%-4d rval=%-12f string=%-12s\n", token.col, token.row, token.type, token_to_string(token.type), token.ival, token.rval, token.string);
-    fprintf(fp, "Token(%-2d, %-2d): type=%-3d(%-12s) ival=%-4d rval=%-12f string=%-12s\n", token.col, token.row, token.type, token_to_string(token.type), token.ival, token.rval, token.string);
+    fprintf(fp, "Token(%d, %d): type=%d(%s) ival=%d rval=%f string=%s\n", token.col, token.row, token.type, token_to_string(token.type), token.ival, token.rval, token.string);
     token = get_next_token();
   }
 
   fclose(fp);
 
   print_symbol_table(symbol_table, num_symbols);
-  write_symbol_table(symbol_table, num_symbols);
+  write_symbol_table("output/lexer-symtab-out.txt", symbol_table, num_symbols);
 
   return 0;
 }
